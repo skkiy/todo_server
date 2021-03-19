@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
+    hostname: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpw
+      MYSQL_DATABASE: todo_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: passw0rd
+      TZ: "Asia/Tokyo"
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --skip-character-set-client-handshake --innodb-use-native-aio=0
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - ./docker/mysql/local:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+    ports: 
+      - "8080:8080"
+    volumes:
+      - .:/go/src/todo_server
+    depends_on: 
+      - db
+    command: ./todo_server
