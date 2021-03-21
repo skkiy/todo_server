@@ -1,0 +1,76 @@
+interface Node {
+  id: ID!
+}
+
+type User {
+  id: ID!
+}
+
+type Task implements Node {
+  id: ID!
+  title: String!
+  description: String
+  createdAt: Time!
+  deadline: Time!
+  isCompleted: Boolean!
+}
+
+type PageInfo {
+  endCursor: String!
+  hasNextPage: Boolean!
+}
+
+interface Connection {
+  pageInfo: PageInfo!
+  edges: [Edge]!
+}
+
+interface Edge {
+  cursor: String!
+  node: Node!
+}
+
+type TaskEdge implements Edge {
+  cursor: String!
+  node: Task!
+}
+
+type TaskConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [TaskEdge]!
+}
+
+enum TaskOrderKey {
+  CREATED_AT
+  DEADLINE
+}
+
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+type Query {
+  tasks(orderKey: TaskOrderKey, orderDirection: OrderDirection): TaskConnection!
+}
+
+input CreateTaskInput {
+  title: String!
+  description: String
+  deadline: Time!
+}
+
+input UpdateTaskInput {
+  id: ID!
+  title: String
+  description: String
+  deadline: String
+  isCompleted: Boolean
+}
+
+type Mutation {
+  createTask(input: CreateTaskInput!): Task!
+  updateTask(input: UpdateTaskInput!): Task
+}
+
+scalar Time
