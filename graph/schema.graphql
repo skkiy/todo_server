@@ -1,28 +1,76 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-type Todo {
+interface Node {
   id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
 }
 
 type User {
   id: ID!
-  name: String!
+}
+
+type Task implements Node {
+  id: ID!
+  title: String!
+  description: String
+  createdAt: Time!
+  deadline: Time!
+  isCompleted: Boolean!
+}
+
+type PageInfo {
+  endCursor: String!
+  hasNextPage: Boolean!
+}
+
+interface Connection {
+  pageInfo: PageInfo!
+  edges: [Edge]!
+}
+
+interface Edge {
+  cursor: String!
+  node: Node!
+}
+
+type TaskEdge implements Edge {
+  cursor: String!
+  node: Task!
+}
+
+type TaskConnection implements Connection {
+  pageInfo: PageInfo!
+  edges: [TaskEdge]!
+}
+
+enum TaskOrderKey {
+  CREATED_AT
+  DEADLINE
+}
+
+enum OrderDirection {
+  ASC
+  DESC
 }
 
 type Query {
-  todos: [Todo!]!
+  tasks(orderKey: TaskOrderKey, orderDirection: OrderDirection): TaskConnection!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+input CreateTaskInput {
+  title: String!
+  description: String
+  deadline: Time!
+}
+
+input UpdateTaskInput {
+  id: ID!
+  title: String
+  description: String
+  deadline: String
+  isCompleted: Boolean
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  createTask(input: CreateTaskInput!): Task!
+  updateTask(input: UpdateTaskInput!): Task
 }
+
+scalar Time

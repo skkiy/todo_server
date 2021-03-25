@@ -6,16 +6,34 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/sk62793/todo_server/graph/generated"
 	"github.com/sk62793/todo_server/graph/model"
+	"github.com/sk62793/todo_server/tools"
 )
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.Task, error) {
+	task := &model.Task{
+		ID:          tools.UUID(),
+		Title:       input.Title,
+		Description: *input.Description,
+		CreatedAt:   time.Now(),
+		Deadline:    input.Deadline,
+		IsCompleted: false,
+	}
+
+	if err := r.taskRepo.Create(task); err != nil {
+		return nil, err
+	}
+	return task, nil
+}
+
+func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTaskInput) (*model.Task, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
+func (r *queryResolver) Tasks(ctx context.Context, orderKey *model.TaskOrderKey, orderDirection *model.OrderDirection) (*model.TaskConnection, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

@@ -12,21 +12,22 @@ import (
 	"github.com/sk62793/todo_server/config"
 	"github.com/sk62793/todo_server/graph"
 	"github.com/sk62793/todo_server/graph/generated"
+	"github.com/sk62793/todo_server/repository"
 )
 
 const defaultPort = "8080"
 
 func main() {
-	_, err := config.NewDB()
+	db, err := config.NewDB()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// uR, rR, aR, tR, cR := repository.NewRepository(db)
+	tR := repository.NewRepository(db)
 
 	h := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
-			generated.Config{Resolvers: &graph.Resolver{}},
+			generated.Config{Resolvers: graph.NewResolver(tR)},
 		),
 	)
 	ph := playground.Handler("GraphQL", "/query")

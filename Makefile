@@ -10,3 +10,11 @@ local-up-nocache:
 .PHONY: local-down
 local-down:
 	docker-compose -f docker-compose.local.yml down
+
+.PHONY: generate
+generate:
+	go run github.com/99designs/gqlgen generate
+
+.PHONY: local-db-exec
+local-db-exec:
+	docker-compose -f docker-compose.local.yml exec db bash
