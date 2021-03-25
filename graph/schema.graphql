@@ -27,12 +27,12 @@ interface Connection {
 
 interface Edge {
   cursor: String!
-  node: Node!
+  node: Node
 }
 
 type TaskEdge implements Edge {
   cursor: String!
-  node: Task!
+  node: Task
 }
 
 type TaskConnection implements Connection {

@@ -34,7 +34,38 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTas
 }
 
 func (r *queryResolver) Tasks(ctx context.Context, orderKey *model.TaskOrderKey, orderDirection *model.OrderDirection) (*model.TaskConnection, error) {
-	panic(fmt.Errorf("not implemented"))
+	pageInfo := &model.PageInfo{
+		HasNextPage: true,
+	}
+
+	tasks, err := r.taskRepo.Tasks(orderKey, orderDirection)
+	if err != nil {
+		return nil, err
+	}
+
+	edges := make([]*model.TaskEdge, len(tasks))
+	for i, task := range tasks {
+		cursor := task.ID
+		edges[i] = &model.TaskEdge{
+			Cursor: cursor,
+			Node: &model.Task{
+				ID:          task.ID,
+				Title:       task.Title,
+				Description: task.Description,
+				CreatedAt:   task.CreatedAt,
+				Deadline:    task.Deadline,
+				IsCompleted: task.IsCompleted,
+			},
+		}
+		if i == len(tasks)-1 {
+			pageInfo.EndCursor = cursor
+		}
+	}
+
+	return &model.TaskConnection{
+		PageInfo: pageInfo,
+		Edges:    edges,
+	}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
