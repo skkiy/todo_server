@@ -12,3 +12,11 @@ type Task struct {
 }
 
 func (Task) IsNode() {}
+
+func EmptyTaskConnection() *TaskConnection {
+	return &TaskConnection{
+		PageInfo:   &PageInfo{},
+		Edges:      []*TaskEdge{},
+		TotalCount: 0,
+	}
+}

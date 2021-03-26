@@ -16,13 +16,16 @@ type Task implements Node {
 }
 
 type PageInfo {
-  endCursor: String!
+  startCursor: Cursor!
+  endCursor: Cursor!
+  hasPreviousPage: Boolean!
   hasNextPage: Boolean!
 }
 
 interface Connection {
   pageInfo: PageInfo!
   edges: [Edge]!
+  totalCount: Int!
 }
 
 interface Edge {
@@ -38,6 +41,7 @@ type TaskEdge implements Edge {
 type TaskConnection implements Connection {
   pageInfo: PageInfo!
   edges: [TaskEdge]!
+  totalCount: Int!
 }
 
 enum TaskOrderKey {
@@ -50,8 +54,46 @@ enum OrderDirection {
   DESC
 }
 
+input FilterCondition {
+  filterWord: String
+  user: ID
+  createdAt: Time
+  deadline: Time
+  isCompleted: Boolean
+}
+
+input PageCondition {
+  backward: BackwardPagination
+  forward: ForwardPagination
+  pageNumber: Int!
+  limit: Int
+}
+
+input BackwardPagination {
+  last: Int!
+  before: Cursor
+}
+
+input ForwardPagination {
+  first: Int!
+  after: Cursor
+}
+
+input EdgeOrder {
+  key: OrderKey!
+  direction: OrderDirection!
+}
+
+input OrderKey {
+  task: TaskOrderKey
+}
+
 type Query {
-  tasks(orderKey: TaskOrderKey, orderDirection: OrderDirection): TaskConnection!
+  tasks(
+    filterCondition: FilterCondition,
+    pageCondition: PageCondition,
+    edgeOrder: EdgeOrder,
+  ): TaskConnection!
 }
 
 input CreateTaskInput {
@@ -74,3 +116,4 @@ type Mutation {
 }
 
 scalar Time
+scalar Cursor

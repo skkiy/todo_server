@@ -33,14 +33,28 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTas
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Tasks(ctx context.Context, orderKey *model.TaskOrderKey, orderDirection *model.OrderDirection) (*model.TaskConnection, error) {
-	pageInfo := &model.PageInfo{
-		HasNextPage: true,
-	}
-
-	tasks, err := r.taskRepo.Tasks(orderKey, orderDirection)
+func (r *queryResolver) Tasks(ctx context.Context, filterCondition *model.FilterCondition, pageCondition *model.PageCondition, edgeOrder *model.EdgeOrder) (*model.TaskConnection, error) {
+	totalCount, err := r.taskRepo.TotalCounts(filterCondition)
 	if err != nil {
 		return nil, err
+	}
+	if totalCount == 0 {
+		return model.EmptyTaskConnection(), nil
+	}
+
+	totalPage := pageCondition.TotalPage(totalCount)
+
+	pageInfo := &model.PageInfo{
+		HasNextPage:     (totalPage - pageCondition.MoveToPageNo()) >= 1,
+		HasPreviousPage: pageCondition.MoveToPageNo() > 1,
+	}
+
+	tasks, err := r.taskRepo.Tasks(filterCondition, pageCondition, edgeOrder)
+	if err != nil {
+		return nil, err
+	}
+	if len(tasks) == 0 {
+		return model.EmptyTaskConnection(), nil
 	}
 
 	edges := make([]*model.TaskEdge, len(tasks))
@@ -57,14 +71,18 @@ func (r *queryResolver) Tasks(ctx context.Context, orderKey *model.TaskOrderKey,
 				IsCompleted: task.IsCompleted,
 			},
 		}
+		if i == 0 {
+			pageInfo.StartCursor = cursor
+		}
 		if i == len(tasks)-1 {
 			pageInfo.EndCursor = cursor
 		}
 	}
 
 	return &model.TaskConnection{
-		PageInfo: pageInfo,
-		Edges:    edges,
+		PageInfo:   pageInfo,
+		Edges:      edges,
+		TotalCount: totalCount,
 	}, nil
 }
 

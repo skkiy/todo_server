@@ -21,20 +21,57 @@ type Node interface {
 	IsNode()
 }
 
+type BackwardPagination struct {
+	Last   int     `json:"last"`
+	Before *string `json:"before"`
+}
+
 type CreateTaskInput struct {
 	Title       string    `json:"title"`
 	Description *string   `json:"description"`
 	Deadline    time.Time `json:"deadline"`
 }
 
+type EdgeOrder struct {
+	Key       *OrderKey      `json:"key"`
+	Direction OrderDirection `json:"direction"`
+}
+
+type FilterCondition struct {
+	FilterWord  *string    `json:"filterWord"`
+	User        *string    `json:"user"`
+	CreatedAt   *time.Time `json:"createdAt"`
+	Deadline    *time.Time `json:"deadline"`
+	IsCompleted *bool      `json:"isCompleted"`
+}
+
+type ForwardPagination struct {
+	First int     `json:"first"`
+	After *string `json:"after"`
+}
+
+type OrderKey struct {
+	Task *TaskOrderKey `json:"task"`
+}
+
+type PageCondition struct {
+	Backward   *BackwardPagination `json:"backward"`
+	Forward    *ForwardPagination  `json:"forward"`
+	PageNumber int                 `json:"pageNumber"`
+	Limit      *int                `json:"limit"`
+}
+
 type PageInfo struct {
-	EndCursor   string `json:"endCursor"`
-	HasNextPage bool   `json:"hasNextPage"`
+	StartCursor     string `json:"startCursor"`
+	EndCursor       string `json:"endCursor"`
+	HasPreviousPage bool   `json:"hasPreviousPage"`
+	HasNextPage     bool   `json:"hasNextPage"`
 }
 
 type TaskConnection struct {
-	PageInfo *PageInfo   `json:"pageInfo"`
-	Edges    []*TaskEdge `json:"edges"`
+	PageInfo   *PageInfo   `json:"pageInfo"`
+	Edges      []*TaskEdge `json:"edges"`
+	TotalCount int         `json:"totalCount"`
 }
 
 func (TaskConnection) IsConnection() {}
