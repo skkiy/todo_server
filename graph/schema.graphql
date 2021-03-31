@@ -94,6 +94,7 @@ type Query {
     pageCondition: PageCondition,
     edgeOrder: EdgeOrder,
   ): TaskConnection!
+  task(id: ID): Task!
 }
 
 input CreateTaskInput {
@@ -106,7 +107,7 @@ input UpdateTaskInput {
   id: ID!
   title: String
   description: String
-  deadline: String
+  deadline: Time
   isCompleted: Boolean
 }
 

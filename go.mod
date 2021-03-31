@@ -3,6 +3,8 @@ module github.com/sk62793/todo_server
 go 1.15
 
 require (
+	firebase.google.com/go v3.13.0+incompatible // indirect
+	firebase.google.com/go/v4 v4.4.0 // indirect
 	github.com/99designs/gqlgen v0.13.0
 	github.com/agnivade/levenshtein v1.1.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect

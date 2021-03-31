@@ -84,11 +84,11 @@ type TaskEdge struct {
 func (TaskEdge) IsEdge() {}
 
 type UpdateTaskInput struct {
-	ID          string  `json:"id"`
-	Title       *string `json:"title"`
-	Description *string `json:"description"`
-	Deadline    *string `json:"deadline"`
-	IsCompleted *bool   `json:"isCompleted"`
+	ID          string     `json:"id"`
+	Title       *string    `json:"title"`
+	Description *string    `json:"description"`
+	Deadline    *time.Time `json:"deadline"`
+	IsCompleted *bool      `json:"isCompleted"`
 }
 
 type User struct {

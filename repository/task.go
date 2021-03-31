@@ -10,6 +10,7 @@ import (
 
 type TaskRepository interface {
 	Create(task *model.Task) error
+	Update(task *model.Task) error
 	FindByID(id string) (*model.Task, error)
 	Tasks(
 		filterCondition *model.FilterCondition,
@@ -48,6 +49,9 @@ func (r *taskRepository) FindByID(id string) (*model.Task, error) {
 
 func (r *taskRepository) Tasks(filterCondition *model.FilterCondition, pageCondition *model.PageCondition, edgeOrder *model.EdgeOrder) ([]*model.Task, error) {
 	base := r.db.Table("tasks")
+
+	base = r.filter(filterCondition, base)
+
 	var tasks []*model.Task
 	if err := base.Find(&tasks).Error; err != nil {
 		return nil, err
@@ -67,5 +71,31 @@ func (r *taskRepository) TotalCounts(filterCondition *model.FilterCondition) (in
 }
 
 func (r *taskRepository) filter(filterCondition *model.FilterCondition, base *gorm.DB) *gorm.DB {
+
+	if filterCondition == nil {
+		return base
+	}
+
+	if filterCondition.FilterWord != nil {
+		filterWord := filterCondition.FilterWord
+		base = base.Where("title LIKE ? OR description LIKE ?", "%"+*filterWord+"%", "%"+*filterWord+"%")
+	}
+
+	if filterCondition.IsCompleted != nil {
+		base = base.Where("is_completed = ?", filterCondition.IsCompleted)
+	}
+
 	return base
+}
+
+func (r *taskRepository) Update(task *model.Task) error {
+	if err := r.db.Table("tasks").Where("id = ?", task.ID).Updates(model.Task{
+		Title:       task.Title,
+		Description: task.Description,
+		Deadline:    task.Deadline,
+		IsCompleted: task.IsCompleted,
+	}).Error; err != nil {
+		return err
+	}
+	return nil
 }
