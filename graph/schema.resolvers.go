@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/sk62793/todo_server/graph/generated"
@@ -41,6 +42,10 @@ func (r *mutationResolver) UpdateTask(ctx context.Context, input model.UpdateTas
 		return nil, err
 	}
 	return task, nil
+}
+
+func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) Tasks(ctx context.Context, filterCondition *model.FilterCondition, pageCondition *model.PageCondition, edgeOrder *model.EdgeOrder) (*model.TaskConnection, error) {
@@ -102,6 +107,17 @@ func (r *queryResolver) Task(ctx context.Context, id *string) (*model.Task, erro
 		return nil, err
 	}
 	return task, nil
+}
+
+func (r *queryResolver) User(ctx context.Context, id *string, name string, email string, twitter *string) (*model.User, error) {
+	user, err := r.userRepo.FindByID(*id)
+	if err != nil {
+		user = &model.User{ID: *id, Name: name, Email: email}
+		if err := r.userRepo.Create(user); err != nil {
+			return nil, err
+		}
+	}
+	return user, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

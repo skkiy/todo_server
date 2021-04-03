@@ -23,6 +23,7 @@ services:
       - "8080:8080"
     volumes:
       - .:/go/src/todo_server
+      # - ./secret.json:/secret.json
     entrypoint:
       - dockerize
       - -timeout

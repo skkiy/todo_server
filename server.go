@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"errors"
 	"log"
 	"net/http"
 	"strings"
@@ -28,11 +28,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tR := repository.NewRepository(db)
+	tR, uR := repository.NewRepository(db)
 
 	h := handler.NewDefaultServer(
 		generated.NewExecutableSchema(
-			generated.Config{Resolvers: graph.NewResolver(tR)},
+			generated.Config{Resolvers: graph.NewResolver(tR, uR)},
 		),
 	)
 	ph := playground.Handler("GraphQL", "/query")
@@ -41,7 +41,12 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.Logger())
 
-	e.Use(auth)
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{config.CORSAllowOrigin()},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
+
+	// e.Use(auth)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
@@ -62,24 +67,29 @@ func main() {
 
 func auth(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		opt := option.WithCredentialsFile("secret.json")
-		app, err := firebase.NewApp(context.Background(), nil, opt)
+		ctx := c.Request().Context()
+
+		opt := option.WithCredentialsFile("/secret.json")
+		app, err := firebase.NewApp(ctx, nil, opt)
 		if err != nil {
-			return err
+			return errors.New("failed to initialize firebase.App")
 		}
-		client, err := app.Auth(context.Background())
+		client, err := app.Auth(ctx)
 		if err != nil {
-			return err
+			return errors.New("failed to get auth client")
 		}
 
 		auth := c.Request().Header.Get("Authorization")
-		idToken := strings.Replace(auth, "Bearer ", "", 1)
-		token, err := client.VerifyIDToken(context.Background(), idToken)
-		if err != nil {
-			return err
+
+		parts := strings.Split(auth, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			return errors.New("token is invalid")
 		}
 
-		c.Set("token", token)
+		if _, err := client.VerifyIDToken(ctx, parts[1]); err != nil {
+			return errors.New("invalid token")
+		}
+
 		return next(c)
 	}
 }

@@ -4,6 +4,9 @@ interface Node {
 
 type User {
   id: ID!
+  name: String!
+  email: String!
+  twitter: String
 }
 
 type Task implements Node {
@@ -95,6 +98,7 @@ type Query {
     edgeOrder: EdgeOrder,
   ): TaskConnection!
   task(id: ID): Task!
+  user(id: ID, name: String!, email: String!, twitter: String): User
 }
 
 input CreateTaskInput {
@@ -111,9 +115,17 @@ input UpdateTaskInput {
   isCompleted: Boolean
 }
 
+input UpdateUserInput {
+  id: ID!
+  name: String!
+  email: String!
+  twitter: String
+}
+
 type Mutation {
   createTask(input: CreateTaskInput!): Task!
   updateTask(input: UpdateTaskInput!): Task
+  updateUser(input: UpdateUserInput!): User
 }
 
 scalar Time

@@ -91,8 +91,18 @@ type UpdateTaskInput struct {
 	IsCompleted *bool      `json:"isCompleted"`
 }
 
+type UpdateUserInput struct {
+	ID      string  `json:"id"`
+	Name    string  `json:"name"`
+	Email   string  `json:"email"`
+	Twitter *string `json:"twitter"`
+}
+
 type User struct {
-	ID string `json:"id"`
+	ID      string  `json:"id"`
+	Name    string  `json:"name"`
+	Email   string  `json:"email"`
+	Twitter *string `json:"twitter"`
 }
 
 type OrderDirection string

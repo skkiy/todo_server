@@ -2,6 +2,11 @@
 local-up:
 	docker-compose -f docker-compose.local.yml up -d --build
 
+.PHONY: local-up-auth
+local-up-auth:
+	docker-compose -f docker-compose.local.yml build
+	docker-compose -f docker-compose.local.yml -v "$(TODO_SECRET_KEY):/secret.json" run
+
 .PHONY: local-up-nocache
 local-up-nocache:
 	rm -rf docker/mysql/data

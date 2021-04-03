@@ -8,10 +8,12 @@ import "github.com/sk62793/todo_server/repository"
 
 type Resolver struct {
 	taskRepo repository.TaskRepository
+	userRepo repository.UserRepository
 }
 
-func NewResolver(tR repository.TaskRepository) *Resolver {
+func NewResolver(tR repository.TaskRepository, uR repository.UserRepository) *Resolver {
 	return &Resolver{
 		taskRepo: tR,
+		userRepo: uR,
 	}
 }
